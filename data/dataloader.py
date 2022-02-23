@@ -1,14 +1,6 @@
-# Adapted from GrabNet
-
-import numpy as np
 import torch
 from torch.utils import data
-from torch.utils.data._utils.collate import default_collate
-import os
-
-import time
-import numpy as np
-import torch
+import os, time
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 to_cpu = lambda tensor: tensor.detach().cpu().numpy()
@@ -16,26 +8,38 @@ to_cpu = lambda tensor: tensor.detach().cpu().numpy()
 class LoadData(data.Dataset):
     def __init__(self,
                  dataset_dir,
-                 ds_name='train',
-                 dtype=torch.float32,
-                 only_params = False,
-                 load_on_ram = False):
+                 ds_name='train_data',
+                 dtype=torch.float32):
 
         super(LoadData, self).__init__()
 
-        self.only_params = only_params
         self.ds_path = os.path.join(dataset_dir, ds_name)
-        self.ds = self._np2torch(os.path.join(self.ds_path, 'filename'))
+        self.ds = torch.load(os.path.join(dataset_dir, ds_name+'.pt'))
 
-        def _np2torch(self, ds_path):
-            data = np.load(ds_path, allow_pickle=True)
-            data_torch = {k:torch.tensor(data[k]) for k in data.files}
-            return data_torch
+    def __len__(self):
+        k = list(self.ds.keys())[0]
+        return self.ds[k].shape[0]
 
-        def __len__(self):
-            k = list(self.ds.keys())[0]
-            return self.ds[k].shape[0]
+    def __getitem__(self, idx):
+        data_out = {k: self.ds[k][idx] for k in self.ds.keys()}
+        return data_out
 
-        def __getitem__(self, idx):
+if __name__=='__main__':
 
-            return None
+    data_path = 'datasets_parsed'
+    ds = LoadData(data_path)
+
+    dataloader = data.DataLoader(ds, batch_size=32, shuffle=True, num_workers=8, drop_last=True)
+
+    s = time.time()
+    for i in range(320):
+        a = ds[i]
+    print(time.time() - s)
+    print('pass')
+
+    dl = iter(dataloader)
+    s = time.time()
+    for i in range(10):
+        a = next(dl)
+    print(time.time() - s)
+    print('pass')
