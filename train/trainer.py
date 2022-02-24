@@ -34,7 +34,7 @@ class Trainer:
 
         summary_logdir = os.path.join(work_dir, 'summaries')
         self.swriter = SummaryWriter(log_dir=summary_logdir)
-        logger(' - Started training GrabNet, experiment code %s' % (starttime))
+        logger(' - Started training GNet, experiment code %s' % (starttime))
         logger('tensorboard --logdir=%s' % summary_logdir)
         logger('Torch Version: %s\n' % torch.__version__)
 
@@ -85,10 +85,10 @@ class Trainer:
             loss_total_gnet.backward()
             self.optimizer_gnet.step()
 
-            train_loss_dict_cnet = {k: train_loss_dict_gnet.get(k, 0.0) + v.item() for k, v in cur_loss_dict_gnet.items()}
+            train_loss_dict_gnet = {k: train_loss_dict_gnet.get(k, 0.0) + v.item() for k, v in cur_loss_dict_gnet.items()}
             if it % (self.cfg.save_every_it + 1) == 0:
-                cur_train_loss_dict_cnet = {k: v / (it + 1) for k, v in train_loss_dict_cnet.items()}
-                train_msg = self.create_loss_message(cur_train_loss_dict_cnet,
+                cur_train_loss_dict_gnet = {k: v / (it + 1) for k, v in train_loss_dict_gnet.items()}
+                train_msg = self.create_loss_message(cur_train_loss_dict_gnet,
                                                     expr_ID=self.cfg.expr_ID,
                                                     epoch_num=self.epochs_completed,
                                                     model_name='CoarseNet',
@@ -184,7 +184,7 @@ class Trainer:
                     if eval_loss_dict_gnet['loss_total'] < self.best_loss_gnet:
 
                         self.cfg.best_gnet = makepath(os.path.join(self.cfg.work_dir, 'snapshots',
-                                                                   'TR%02d_E%03d_cnet.pt' % (
+                                                                   'TR%02d_E%03d_gnet.pt' % (
                                                                    self.try_num, self.epochs_completed)), isfile=True)
                         self.save_gnet()
                         self.logger(eval_msg + ' ** ')
@@ -193,7 +193,7 @@ class Trainer:
                     else:
                         self.logger(eval_msg)
 
-                    self.swriter.add_scalars('total_loss_cnet/scalars',
+                    self.swriter.add_scalars('total_loss_gnet/scalars',
                                              {'train_loss_total': train_loss_dict_gnet['loss_total'],
                                               'evald_loss_total': eval_loss_dict_gnet['loss_total'], },
                                              self.epochs_completed)
