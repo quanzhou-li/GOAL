@@ -9,11 +9,7 @@ import torch
 
 from torch import nn
 from torch.nn import functional as F
-from tools.utils import rotmat2aa, CRot2rotmat
-
-
-# from tools.train_tools import point2point_signed
-
+from tools.utils import CRot2rotmat
 
 class ResBlock(nn.Module):
 
@@ -55,8 +51,8 @@ class ResBlock(nn.Module):
 
 class GNet(nn.Module):
     def __init__(self,
-                 in_condition,
-                 in_params,
+                 in_condition=1024,
+                 in_params=1632,
                  n_neurons=512,
                  latentD=16,
                  **kwargs):
@@ -76,26 +72,28 @@ class GNet(nn.Module):
         self.dec_rb1 = ResBlock(latentD + in_condition, n_neurons)
         self.dec_rb2 = ResBlock(n_neurons + latentD + in_condition, n_neurons)
 
-        self.dec_pose = nn.Linear(n_neurons, 55 * 3)  # Theta
+        self.dec_pose = nn.Linear(n_neurons, 55 * 6)  # Theta
         self.dec_trans = nn.Linear(n_neurons, 3)  # body translation
         self.dec_ver = nn.Linear(n_neurons, 400 * 3)  # vertices locations
-        self.dec_dis = nn.Linear(n_neurons, 99 * 3)  # hand-object distances
-        self.dec_horient = nn.Linear(n_neurons, 3)  # head orientation
+        self.dec_dis = nn.Linear(n_neurons, 99)  # hand-object distances
 
-    def encode(self, fullpose, trans_subject, vertices, distances, h_orient, trans_object, bps_object):
+    def encode(self, fullpose_rotmat, body_transl, verts, dists, bps_dists):
         '''
-        :param fullpose: 55 * 3
-        :param trans_subject: 3
-        :param vertices: 400 * 3
-        :param distances: 99 * 3
-        :param h_orient: 3
-        :param bps_object: 1024
+        :param fullpose_rotmat: N * 1 * 55 * 9
+        :param body_transl: N * 3
+        :param verts: N * 400 * 3
+        :param dists: N * 99
+        :param bps_dists: N * 1024
         :param trans_object: 3
         :return:
         '''
-        bs = fullpose.shape[0]
+        bs = fullpose_rotmat.shape[0]
 
-        X = torch.cat([fullpose, trans_subject, vertices.flatten(start_dim=1), distances.flatten(start_dim=1), h_orient, trans_object, bps_object], dim=1)
+        # Get 6D rotation representation of fullpose_rotmat
+        fullpose_6D = (fullpose_rotmat.reshape(bs, 1, 55, 3, 3))[:,:,:,:,:2]
+        fullpose_6D = fullpose_6D.reshape(bs, 55*6)
+
+        X = torch.cat([fullpose_6D, body_transl, verts.flatten(start_dim=1), dists, bps_dists], dim=1)
 
         X0 = self.enc_bn1(X)
         X = self.enc_rb1(X0)
@@ -103,29 +101,30 @@ class GNet(nn.Module):
 
         return torch.distributions.normal.Normal(self.enc_mu(X), F.softplus(self.enc_var(X)))
 
-    def decode(self, Zin, trans_object, bps_object):
+    def decode(self, Zin, bps_dists):
         bs = Zin.shape[0]
 
-        condition = self.dec_bn1(torch.cat([trans_object, bps_object], dim=1))
+        condition = self.dec_bn1(bps_dists)
 
         X0 = torch.cat([Zin, condition], dim=1)
         X = self.dec_rb1(X0)
         X = self.dec_rb2(torch.cat([X0, X], dim=1))
 
-        fullpose = self.dec_pose(X)
-        trans_subject = self.dec_trans(X)
-        vertices = self.dec_ver(X)
-        distances = self.dec_dis(X)
-        head_orient = self.dec_horient(X)
+        fullpose_6D = self.dec_pose(X)
+        body_transl = self.dec_trans(X)
+        verts = self.dec_ver(X)
+        dists = self.dec_dis(X)
 
-        return {'fullpose': fullpose, 'trans_subjecct': trans_subject,
-                'vertices': vertices, 'distances': distances, 'head_orient': head_orient}
+        fullpose_rotmat = CRot2rotmat(fullpose_6D).reshape(bs, 1, 55, 9)
 
-    def forward(self, fullpose, trans_subject, vertices, distances, h_orient, trans_object, bps_object, **kwargs):
-        z = self.encode(fullpose, trans_subject, vertices, distances, h_orient, trans_object, bps_object)
+        return {'fullpose_rotmat': fullpose_rotmat, 'body_transl': body_transl,
+                'verts': verts, 'hand_object_dists': dists}
+
+    def forward(self, fullpose_rotmat, body_transl, verts, dists, bps_dists, **kwargs):
+        z = self.encode(fullpose_rotmat, body_transl, verts, dists, bps_dists)
         z_s = z.rsample()
 
-        params = self.decode(z_s, trans_object, bps_object)
+        params = self.decode(z_s, bps_dists)
         results = {'mean': z.mean, 'std': z.scale}
         results.update(params)
 
