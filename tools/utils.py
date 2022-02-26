@@ -35,6 +35,10 @@ def to_tensor(array, dtype=torch.float32):
     return array.to(dtype)
 
 
+def params2torch(params, dtype = torch.float32):
+    return {k: torch.from_numpy(v).type(dtype) for k, v in params.items()}
+
+
 def to_np(array, dtype=np.float32):
     if 'scipy.sparse' in str(type(array)):
         array = np.array(array.todense(), dtype=dtype)
