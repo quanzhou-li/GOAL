@@ -49,7 +49,8 @@ if __name__=='__main__':
 
     cfg = {
         'work_dir': work_dir,
-        'ds_name': 'train_data',
+        'ds_train': 'train_data',
+        'ds_val': 'train_data',
         'batch_size': batch_size,
         'n_workers': n_workers,
         'use_multigpu': use_multigpu,
@@ -57,7 +58,7 @@ if __name__=='__main__':
         'dataset_dir': data_path,
         'expr_ID': expr_ID,
         'base_lr': base_lr,
-        'n_epochs': 10,
+        'n_epochs': 100,
         'latentD': 16,
         'save_every_it': 10,
         'best_gnet': None,
