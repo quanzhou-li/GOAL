@@ -24,7 +24,7 @@ class Trainer:
 
     def __init__(self, cfg):
 
-        self.dtype = torch.float32
+        self.dtype = torch.float64
 
         work_dir = cfg.work_dir
         starttime = datetime.now().replace(microsecond=0)
@@ -60,7 +60,7 @@ class Trainer:
 
         vars_gnet = [var[1] for var in self.gnet.named_parameters()]
         gnet_n_params = sum(p.numel() for p in vars_gnet if p.requires_grad)
-        logger('Total Trainable Parameters for CoarseNet is %2.2f M.' % ((gnet_n_params) * 1e-6))
+        logger('Total Trainable Parameters for GNet is %2.2f M.' % ((gnet_n_params) * 1e-6))
 
         self.optimizer_gnet = optim.Adam(vars_gnet, lr=cfg.base_lr, weight_decay=cfg.reg_coef)
 
@@ -91,7 +91,7 @@ class Trainer:
                 train_msg = self.create_loss_message(cur_train_loss_dict_gnet,
                                                     expr_ID=self.cfg.expr_ID,
                                                     epoch_num=self.epochs_completed,
-                                                    model_name='CoarseNet',
+                                                    model_name='GNet',
                                                     it=it,
                                                     try_num=self.try_num,
                                                     mode='train')
@@ -117,7 +117,7 @@ class Trainer:
             loc=torch.tensor(np.zeros([self.cfg.batch_size, self.cfg.latentD]), requires_grad=False).to(self.device).type(self.dtype),
             scale=torch.tensor(np.ones([self.cfg.batch_size, self.cfg.latentD]), requires_grad=False).to(self.device).type(self.dtype)
         )
-        loss_kl = self.cfg.kl_coef * torch.mean(torch.sum(torch.distributions.kl.kl_divergence(q_z, p_z)))
+        loss_kl = 10 * self.cfg.kl_coef * torch.mean(torch.sum(torch.distributions.kl.kl_divergence(q_z, p_z)))
 
         loss_dict = {
             'loss_kl': loss_kl,
@@ -205,8 +205,8 @@ class Trainer:
         self.logger('Finished Training at %s\n' % (datetime.strftime(endtime, '%Y-%m-%d_%H:%M:%S')))
         self.logger(
             'Training done in %s!\n' % (endtime - starttime))
-        self.logger('Best CoarseNet val total loss achieved: %.2e\n' % (self.best_loss_gnet))
-        self.logger('Best CoarseNet model path: %s\n' % self.cfg.best_gnet)
+        self.logger('Best GNet val total loss achieved: %.2e\n' % (self.best_loss_gnet))
+        self.logger('Best GNet model path: %s\n' % self.cfg.best_gnet)
 
     def save_gnet(self):
         torch.save(self.gnet.module.state_dict()

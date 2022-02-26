@@ -51,7 +51,7 @@ class ResBlock(nn.Module):
 
 class GNet(nn.Module):
     def __init__(self,
-                 in_condition=1024,
+                 in_condition=1024+3,
                  in_params=1632,
                  n_neurons=512,
                  latentD=16,
@@ -77,14 +77,14 @@ class GNet(nn.Module):
         self.dec_ver = nn.Linear(n_neurons, 400 * 3)  # vertices locations
         self.dec_dis = nn.Linear(n_neurons, 99)  # hand-object distances
 
-    def encode(self, fullpose_rotmat, body_transl, verts, hand_object_dists, bps_dists):
+    def encode(self, fullpose_rotmat, body_transl, verts, hand_object_dists, bps_dists, object_transl):
         '''
         :param fullpose_rotmat: N * 1 * 55 * 9
         :param body_transl: N * 3
         :param verts: N * 400 * 3
         :param dists: N * 99
         :param bps_dists: N * 1024
-        :param trans_object: 3
+        :param object_transl: N * 3
         :return:
         '''
         bs = fullpose_rotmat.shape[0]
@@ -93,7 +93,7 @@ class GNet(nn.Module):
         fullpose_6D = (fullpose_rotmat.reshape(bs, 1, 55, 3, 3))[:,:,:,:,:2]
         fullpose_6D = fullpose_6D.reshape(bs, 55*6)
 
-        X = torch.cat([fullpose_6D, body_transl, verts.flatten(start_dim=1), hand_object_dists, bps_dists], dim=1)
+        X = torch.cat([fullpose_6D, body_transl, verts.flatten(start_dim=1), hand_object_dists, bps_dists, object_transl], dim=1)
 
         X0 = self.enc_bn1(X)
         X = self.enc_rb1(X0)
@@ -101,10 +101,10 @@ class GNet(nn.Module):
 
         return torch.distributions.normal.Normal(self.enc_mu(X), F.softplus(self.enc_var(X)))
 
-    def decode(self, Zin, bps_dists):
+    def decode(self, Zin, bps_dists, object_transl):
         bs = Zin.shape[0]
 
-        condition = self.dec_bn1(bps_dists)
+        condition = self.dec_bn1(torch.cat([bps_dists, object_transl], dim=1))
 
         X0 = torch.cat([Zin, condition], dim=1)
         X = self.dec_rb1(X0)
@@ -120,11 +120,11 @@ class GNet(nn.Module):
         return {'fullpose_rotmat': fullpose_rotmat, 'body_transl': body_transl,
                 'verts': verts, 'hand_object_dists': hand_object_dists}
 
-    def forward(self, fullpose_rotmat, body_transl, verts, hand_object_dists, bps_dists, **kwargs):
-        z = self.encode(fullpose_rotmat, body_transl, verts, hand_object_dists, bps_dists)
+    def forward(self, fullpose_rotmat, body_transl, verts, hand_object_dists, bps_dists, object_transl, **kwargs):
+        z = self.encode(fullpose_rotmat, body_transl, verts, hand_object_dists, bps_dists, object_transl)
         z_s = z.rsample()
 
-        params = self.decode(z_s, bps_dists)
+        params = self.decode(z_s, bps_dists, object_transl)
         results = {'mean': z.mean, 'std': z.scale}
         results.update(params)
 
