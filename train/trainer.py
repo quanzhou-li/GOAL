@@ -43,8 +43,10 @@ class Trainer:
             torch.cuda.empty_cache()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        ds = LoadData(cfg.dataset_dir, ds_name=cfg.ds_name)
-        self.ds = DataLoader(ds, batch_size=cfg.batch_size, num_workers=cfg.n_workers, shuffle=True, drop_last=True)
+        ds_train = LoadData(cfg.dataset_dir, ds_name=cfg.ds_train)
+        ds_val = LoadData(cfg.dataset_dir, ds_name=cfg.ds_val)
+        self.ds_train = DataLoader(ds_train, batch_size=cfg.batch_size, num_workers=cfg.n_workers, shuffle=True, drop_last=True)
+        self.ds_val = DataLoader(ds_val, batch_size=cfg.batch_size, num_workers=cfg.n_workers, shuffle=True, drop_last=True)
 
         self.gnet = GNet().to(self.device)
 
@@ -74,7 +76,7 @@ class Trainer:
 
         train_loss_dict_gnet = {}
 
-        for it, data in enumerate(self.ds):
+        for it, data in enumerate(self.ds_train):
             data = {k: data[k].to(self.device) for k in data.keys()}
 
             self.optimizer_gnet.zero_grad()
@@ -98,7 +100,7 @@ class Trainer:
 
                 self.logger(train_msg)
 
-        train_loss_dict_gnet = {k: v / len(self.ds) for k, v in train_loss_dict_gnet.items()}
+        train_loss_dict_gnet = {k: v / len(self.ds_train) for k, v in train_loss_dict_gnet.items()}
         return train_loss_dict_gnet
 
     def loss_gnet(self, data, drec, ds_name='train_data'):
@@ -137,7 +139,7 @@ class Trainer:
 
         eval_loss_dict_gnet = {}
 
-        dataset = self.ds ## change when having validation set
+        dataset = self.ds_val
 
         with torch.no_grad():
             for data in dataset:
@@ -178,7 +180,7 @@ class Trainer:
 
                 with torch.no_grad():
                     eval_msg = Trainer.create_loss_message(eval_loss_dict_gnet, expr_ID=self.cfg.expr_ID,
-                                                           epoch_num=self.epochs_completed, it=len(self.ds), ### change when validation set available
+                                                           epoch_num=self.epochs_completed, it=len(self.ds_val),
                                                            model_name='GNet',
                                                            try_num=self.try_num, mode='evald')
                     if eval_loss_dict_gnet['loss_total'] < self.best_loss_gnet:
