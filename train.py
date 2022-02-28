@@ -15,7 +15,7 @@ if __name__=='__main__':
                         help='Saving path')
 
     parser.add_argument('--data-path', required=True, type=str,
-                        help='The path to the folder that contains GrabNet data')
+                        help='The path to the folder that contains GNet data')
 
     parser.add_argument('--expr-ID', default='V00', type=str,
                         help='Training ID')
@@ -30,7 +30,7 @@ if __name__=='__main__':
                         help='Training learning rate')
 
     parser.add_argument('--kl-coef', default=5e-3, type=float,
-                        help='KL divergence coefficent for Coarsenet training')
+                        help='KL divergence coefficent for GNet training')
 
     parser.add_argument('--use-multigpu', default=False,
                         type=lambda arg: arg.lower() in ['true', '1'],
@@ -50,7 +50,7 @@ if __name__=='__main__':
     cfg = {
         'work_dir': work_dir,
         'ds_train': 'train_data',
-        'ds_val': 'train_data',
+        'ds_val': 'val_data',
         'batch_size': batch_size,
         'n_workers': n_workers,
         'use_multigpu': use_multigpu,
@@ -58,7 +58,7 @@ if __name__=='__main__':
         'dataset_dir': data_path,
         'expr_ID': expr_ID,
         'base_lr': base_lr,
-        'n_epochs': 100,
+        'n_epochs': 500,
         'latentD': 16,
         'save_every_it': 10,
         'best_gnet': None,
