@@ -106,20 +106,20 @@ class Trainer:
     def loss_gnet(self, data, drec, ds_name='train_data'):
 
         ### verts loss
-        loss_verts = 30. * (1. - self.cfg.kl_coef) * self.LossL1(data['verts'].flatten(start_dim=1), drec['verts'])
+        loss_verts = 90. * (1. - self.cfg.kl_coef) * self.LossL1(data['verts'].flatten(start_dim=1), drec['verts'])
         ### pose loss
-        loss_pose = 35. * (1. - self.cfg.kl_coef) * self.LossL2(data['fullpose_rotmat'], drec['fullpose_rotmat'])
+        loss_pose = 100. * (1. - self.cfg.kl_coef) * self.LossL2(data['fullpose_rotmat'], drec['fullpose_rotmat'])
         ### body translation loss
-        loss_body_transl = 35. * (1. - self.cfg.kl_coef) * self.LossL2(data['body_transl'], drec['body_transl'])
+        loss_body_transl = 100. * (1. - self.cfg.kl_coef) * self.LossL2(data['body_transl'], drec['body_transl'])
         ### hand to object distance loss
-        loss_dists_h2o = 30. * (1. - self.cfg.kl_coef) * self.LossL1(data['hand_object_dists'], drec['hand_object_dists'])
+        loss_dists_h2o = 90. * (1. - self.cfg.kl_coef) * self.LossL1(data['hand_object_dists'], drec['hand_object_dists'])
         ### KL loss
         q_z = torch.distributions.normal.Normal(drec['mean'], drec['std'])
         p_z = torch.distributions.normal.Normal(
             loc=torch.tensor(np.zeros([self.cfg.batch_size, self.cfg.latentD]), requires_grad=False).to(self.device).type(self.dtype),
             scale=torch.tensor(np.ones([self.cfg.batch_size, self.cfg.latentD]), requires_grad=False).to(self.device).type(self.dtype)
         )
-        loss_kl = 10 * self.cfg.kl_coef * torch.mean(torch.sum(torch.distributions.kl.kl_divergence(q_z, p_z)))
+        loss_kl = 30 * self.cfg.kl_coef * torch.mean(torch.sum(torch.distributions.kl.kl_divergence(q_z, p_z)))
 
         loss_dict = {
             'loss_kl': loss_kl,
