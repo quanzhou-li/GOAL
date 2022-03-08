@@ -45,6 +45,8 @@ class Trainer:
 
         ds_train = LoadData(cfg.dataset_dir, ds_name=cfg.ds_train)
         ds_val = LoadData(cfg.dataset_dir, ds_name=cfg.ds_val)
+        print(len(ds_train))
+        print(len(ds_val))
         self.ds_train = DataLoader(ds_train, batch_size=cfg.batch_size, num_workers=cfg.n_workers, shuffle=True, drop_last=True)
         self.ds_val = DataLoader(ds_val, batch_size=cfg.batch_size, num_workers=cfg.n_workers, shuffle=True, drop_last=True)
 
@@ -108,7 +110,7 @@ class Trainer:
         ### verts loss
         loss_verts = 90. * (1. - self.cfg.kl_coef) * self.LossL1(data['future_verts_delta'], drec['future_verts_delta'])
         ### pose loss
-        loss_pose = 100. * (1. - self.cfg.kl_coef) * self.LossL2(data['future_pose_delta'], drec['future_pose_delta'])
+        loss_pose = 100. * (1. - self.cfg.kl_coef) * self.LossL1(data['future_pose_delta'], drec['future_pose_delta'])
         ### body translation loss
         loss_body_transl = 100. * (1. - self.cfg.kl_coef) * self.LossL2(data['future_transl_delta'], drec['future_transl_delta'])
         ### hand to object distance loss

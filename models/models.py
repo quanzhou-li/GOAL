@@ -172,6 +172,8 @@ class MNet(nn.Module):
         bs = past_pose_rotmat.shape[0]
 
         pose_6D = (past_pose_rotmat.reshape(bs, 5, 55, 3, 3))[:,:,:,:,:2]
+        pose_6D = pose_6D.reshape(bs, 5, 55, 6)
+        pose_6D = pose_6D.reshape(bs, 5, 55 * 6)
         pose_6D = pose_6D.reshape(bs, 5 * 55 * 6)
 
         X = torch.cat([pose_6D, past_transl.reshape(bs, 15), cur_verts.reshape(bs, 1200), cur_velocity.reshape(bs, 1200),
@@ -185,7 +187,7 @@ class MNet(nn.Module):
         future_verts = self.fc_verts(X)
         future_dists = self.fc_dist(X)
 
-        future_pose_rotmat = future_pose_6D.reshape(bs * 10, 55 * 6)
+        future_pose_rotmat = future_pose_6D.reshape(bs, 10, 55 * 6)
         future_pose_rotmat = CRot2rotmat(future_pose_rotmat).reshape(bs, 10, 1, 55, 9)
 
         return {'future_pose_delta': future_pose_rotmat,
