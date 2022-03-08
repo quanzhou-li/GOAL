@@ -142,8 +142,8 @@ class MNet(nn.Module):
         self.Fin = Fin
         self.Fout = Fout
 
-        self.rb1 = ResBlock(Fin, n_neurons)
-        self.rb2 = ResBlock(Fin + n_neurons, n_neurons)
+        self.rb1 = ResBlock(Fin, n_neurons, n_neurons=n_neurons)
+        self.rb2 = ResBlock(Fin + n_neurons, n_neurons, n_neurons=n_neurons)
 
         self.fc_pose = nn.Linear(n_neurons, 10 * 55 * 6)
         self.fc_transl = nn.Linear(n_neurons, 10 * 3)
