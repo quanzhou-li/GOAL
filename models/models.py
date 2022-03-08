@@ -129,3 +129,66 @@ class GNet(nn.Module):
         results.update(params)
 
         return results
+
+
+class MNet(nn.Module):
+
+    def __init__(self,
+                 Fin=5*55*6+5*3+400*3+400*3+99*3+1024,
+                 Fout=10*55*9+10*99*3+10*3+10*400*3,
+                 n_neurons=1024,
+                 **kwargs):
+        super(MNet, self).__init__()
+        self.Fin = Fin
+        self.Fout = Fout
+
+        self.rb1 = ResBlock(Fin, n_neurons)
+        self.rb2 = ResBlock(Fin + n_neurons, n_neurons)
+
+        self.fc_pose = nn.Linear(n_neurons, 10 * 55 * 6)
+        self.fc_transl = nn.Linear(n_neurons, 10 * 3)
+        self.fc_verts = nn.Linear(n_neurons, 10 * 400 * 3)
+        self.fc_dist = nn.Linear(n_neurons, 10 * 99 * 3)
+
+    def forward(self,
+                past_pose_rotmat,
+                past_transl,
+                cur_velocity,
+                cur_verts,
+                cur_dists_to_goal,
+                bps_goal,
+                **kwargs):
+        '''
+        :param past_pose_rotmat: N * 5 * 1 * 55 * 9
+        :param past_transl: N * 5 * 3
+        :param cur_velocity: N * 400 * 3
+        :param cur_verts: N * 400 * 3
+        :param cur_dists_to_goal: N * 99 * 3
+        :param bps_goal: N * 1 * 1024
+        :param kwargs:
+        :return:
+        '''
+
+        bs = past_pose_rotmat.shape[0]
+
+        pose_6D = (past_pose_rotmat.reshape(bs, 5, 55, 3, 3))[:,:,:,:,:2]
+        pose_6D = pose_6D.reshape(bs, 5 * 55 * 6)
+
+        X = torch.cat([pose_6D, past_transl.reshape(bs, 15), cur_verts.reshape(bs, 1200), cur_velocity.reshape(bs, 1200),
+                       cur_dists_to_goal.reshape(bs, 99 * 3), bps_goal.reshape(bs, 1024)], dim=1)
+
+        X0 = self.rb1(X)
+        X = self.rb2(torch.cat([X, X0], dim=1))
+
+        future_pose_6D = self.fc_pose(X)
+        future_transl = self.fc_transl(X)
+        future_verts = self.fc_verts(X)
+        future_dists = self.fc_dist(X)
+
+        future_pose_rotmat = future_pose_6D.reshape(bs * 10, 55 * 6)
+        future_pose_rotmat = CRot2rotmat(future_pose_rotmat).reshape(bs, 10, 1, 55, 9)
+
+        return {'future_pose_delta': future_pose_rotmat,
+                'future_transl_delta': future_transl.reshape(bs, 10, 3),
+                'future_dists_delta': future_dists.reshape(bs, 10, 99, 3),
+                'future_verts_delta': future_verts.reshape(bs, 10, 400, 3)}
