@@ -4,7 +4,7 @@ sys.path.append('..')
 
 import argparse
 from tools.cfg_parser import Config
-from train.trainer_mnet import Trainer
+from train.trainer_mnet_1frame import Trainer
 
 
 if __name__=='__main__':
