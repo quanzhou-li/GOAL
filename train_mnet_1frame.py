@@ -20,7 +20,7 @@ if __name__=='__main__':
     parser.add_argument('--expr-ID', default='V00', type=str,
                         help='Training ID')
 
-    parser.add_argument('--batch-size', default=256, type=int,
+    parser.add_argument('--batch-size', default=128, type=int,
                         help='Training batch size')
 
     parser.add_argument('--n-workers', default=8, type=int,
