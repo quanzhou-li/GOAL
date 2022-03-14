@@ -46,7 +46,7 @@ class Trainer:
         self.ds_train = DataLoader(ds_train, batch_size=cfg.batch_size, num_workers=cfg.n_workers, shuffle=True, drop_last=True)
         self.ds_val = DataLoader(ds_val, batch_size=cfg.batch_size, num_workers=cfg.n_workers, shuffle=True, drop_last=True)
 
-        self.mnet = MotionNet(np.random.RandomState()).to(self.device)
+        self.mnet = MotionNet(np.random.RandomState(), use_cuda=(self.device==torch.device("cuda"))).to(self.device)
 
         self.LossL1 = torch.nn.L1Loss(reduction='mean')
         self.LossL2 = torch.nn.MSELoss(reduction='mean')
