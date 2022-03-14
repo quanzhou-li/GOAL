@@ -106,7 +106,7 @@ class Trainer:
         ### verts loss
         loss_verts = 90. * (1. - self.cfg.kl_coef) * self.LossL1(data['future_verts'], drec['future_verts'])
         ### pose loss
-        loss_pose = 100. * (1. - self.cfg.kl_coef) * self.LossL1(data['future_pose'], drec['future_pose_'])
+        loss_pose = 100. * (1. - self.cfg.kl_coef) * self.LossL1(data['future_pose'], drec['future_pose'])
         ### body translation loss
         loss_body_transl = 100. * (1. - self.cfg.kl_coef) * self.LossL2(data['future_transl'], drec['future_transl'])
         ### hand to object distance loss
