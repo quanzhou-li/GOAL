@@ -58,7 +58,7 @@ if __name__=='__main__':
         'dataset_dir': data_path,
         'expr_ID': expr_ID,
         'base_lr': base_lr,
-        'n_epochs': 100,
+        'n_epochs': 400,
         'latentD': 16,
         'save_every_it': 10,
         'best_gnet': None,
