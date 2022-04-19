@@ -48,7 +48,7 @@ def render_img(cfg):
     camera_pose[:3, 3] = np.array([0.8, -1.8, 1.5])
     mv.update_camera_pose(camera_pose)
 
-    all_seqs = glob.glob((os.path.join(cfg.data_path, '*/cup_lift_frame*.npz')))
+    all_seqs = glob.glob((os.path.join(cfg.data_path, '*/cubem*.npz')))
 
     for sequence in tqdm(all_seqs):
 
@@ -56,6 +56,7 @@ def render_img(cfg):
 
         bps_dists = torch.tensor(test_data['bps_dists'].reshape(1, 1024))
         object_transl = torch.tensor(test_data['obj_transl'].reshape(1, 3))
+        object_transl += torch.tensor([0, -1.2, 0])
         dist = torch.distributions.normal.Normal(
                 loc=torch.tensor(np.zeros([1, 16]), requires_grad=False),
                 scale=torch.tensor(np.ones([1, 16]), requires_grad=False)
@@ -73,6 +74,7 @@ def render_img(cfg):
                              model_type='smplx',
                              gender=test_data['gender'],
                              use_pca=False,
+                             # num_pca_comps=test_data['n_comps'],
                              v_template=sbj_vtemp,
                              batch_size=1)
 
@@ -86,6 +88,8 @@ def render_img(cfg):
             'right_hand_pose': fullpose[:,120:165].float(),
             'transl': results['body_transl'].reshape(1, 3) + object_transl
         }
+        # sbj_parms['left_hand_pose'] = torch.einsum('bi,ji->bj', [sbj_parms['left_hand_pose'], sbj_m.left_hand_components])
+        # sbj_parms['right_hand_pose'] = torch.einsum('bi,ji->bj', [sbj_parms['right_hand_pose'], sbj_m.right_hand_components])
         verts_sbj = to_cpu(sbj_m(**sbj_parms).vertices)
 
         obj_mesh = os.path.join(cfg.tool_meshes, test_data['object']['object_mesh'])
@@ -118,7 +122,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--model-path', required=True, type=str,
                         help='Path to the saved GNet model')
-    parser.add_argument('--data-path', required=True, type=str,
+    parser.add_argument('--data-path', default='datasets_gnet_test/grab', type=str,
                         help='Path to the test data file')
     parser.add_argument('--renderings', default='renderings', type=str,
                         help='Path to the directory saving the renderings')
