@@ -110,9 +110,8 @@ def render_img(cfg):
 
     gnet_optim = GNetOptim(sbj_m, obj_m, cfg)
     optim_results, optim_fullpose = gnet_optim.fitting(results, obj_parms)
-    optim_fullpose[:, 75:120] = fullpose[:, 75:120]
-    verts_sbj['optim'] = construct_sbj_verts(sbj_m, optim_fullpose.reshape(1, -1),
-                                             optim_results['transl'], object_transl, False)
+    # verts_sbj['optim'] = construct_sbj_verts(sbj_m, optim_fullpose.reshape(1, -1), optim_results['transl'], object_transl, False)
+    verts_sbj['optim'] = to_cpu(sbj_m(**optim_results).vertices)
 
     if not os.path.exists(os.path.join(cfg.renderings, test_data['sbj_id'])):
         os.makedirs(os.path.join(cfg.renderings, test_data['sbj_id']))
