@@ -36,6 +36,7 @@ def parse_npz(sequence, allow_pickle=True):
 
 
 def construct_sbj_verts(sbj_m, fullpose, sbj_transl, obj_transl):
+    sbj_m = sbj_m.to(device)
     fullpose = fullpose.to(device)
     sbj_transl = sbj_transl.to(device)
     obj_transl = obj_transl.to(device)
