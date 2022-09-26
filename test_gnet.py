@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--model-path', required=True, type=str,
                         help='Path to the saved GNet model')
-    parser.add_argument('--data-path', default='datasets_gnet_test/grab/s8/cup_drink_1_frame265.npz', type=str,
+    parser.add_argument('--data-path', default='datasets_gnet_test/grab/s8/cup_drink_1_frame267.npz', type=str,
                         help='Path to the test data file')
     parser.add_argument('--renderings', default='renderings_optim', type=str,
                         help='Path to the directory saving the renderings')
