@@ -123,9 +123,8 @@ class GNetOptim(nn.Module):
                 if itr % 10 == 0:
                     print(self.create_loss_message(losses, stg, itr))
 
-        opt_results = {k: v for k, v in self.opt_params.items()}
-        fullpose = torch.cat([v for k, v in self.opt_params.items() if k != 'transl'], dim=1)
-        return opt_results, fullpose
+        opt_results = {k: rotmat2aa(CRot2rotmat(v).reshape(-1, 9)).reshape(1, -1, 3) for k, v in self.opt_params.items()}
+        return opt_results
 
     @staticmethod
     def create_loss_message(loss_dict, stage=0, itr=0):
