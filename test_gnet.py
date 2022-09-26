@@ -118,6 +118,7 @@ def render_img(cfg):
 
     for k in verts_sbj.keys():
         s_mesh = Mesh(vertices=verts_sbj[k][0], faces=sbj_m.faces, vc=colors['pink'], smooth=True)
+        print(verts_sbj[k][0][:, 2].min())
         o_mesh = Mesh(vertices=verts_obj[0], faces=obj_mesh.faces, vc=colors['yellow'])
 
         mv.set_static_meshes([o_mesh, s_mesh])
