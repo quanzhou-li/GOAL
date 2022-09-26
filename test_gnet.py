@@ -110,6 +110,8 @@ def render_img(cfg):
 
     gnet_optim = GNetOptim(sbj_m, obj_m, cfg)
     optim_results = gnet_optim.fitting(results, obj_parms)
+    verts_sbj['optim'] = construct_sbj_verts(sbj_m, optim_results['fullpose'].reshape(1, -1),
+                                             optim_results['transl'], object_transl)
 
     if not os.path.exists(os.path.join(cfg.renderings, test_data['sbj_id'])):
         os.makedirs(os.path.join(cfg.renderings, test_data['sbj_id']))
