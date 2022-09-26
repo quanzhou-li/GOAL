@@ -86,7 +86,7 @@ class GNetOptim(nn.Module):
         for k in self.opt_params.keys():
             if k != 'transl':
                 opt_params_rotmat[k] = CRot2rotmat(self.opt_params[k]).reshape(-1, 9)
-                opt_params[k] = rotmat2aa(opt_params_rotmat[k]).reshape(-1, 3)
+                opt_params[k] = rotmat2aa(opt_params_rotmat[k]).reshape(1, -1)
 
         output = self.sbj_m(**opt_params, return_full_pose=True)
         verts = output.vertices
