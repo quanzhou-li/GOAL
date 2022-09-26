@@ -88,7 +88,7 @@ class GNetOptim(nn.Module):
         verts_rh = verts[:, self.rhand_idx]
 
         rh2obj, _, _, _ = self.ch_dist(torch.tensor(verts_rh).to(self.device), torch.tensor(self.obj_verts).to(self.device))
-        rh2obj_w = 1
+        rh2obj_w = 10
 
         losses = {
             'dist_rh2obj': self.LossL1(rh2obj_w*rh2obj, rh2obj_w*net_output['hand_object_dists']),
@@ -99,7 +99,7 @@ class GNetOptim(nn.Module):
         body_loss['right_hand_pose'] = .3*self.LossL1(self.sbj_params['right_hand_pose'], self.opt_params['right_hand_pose'])
         body_loss['transl'] = self.LossL1(self.sbj_params['transl'], self.opt_params['transl'])
 
-        losses.update(body_loss)
+        # losses.update(body_loss)
         loss_total = torch.sum(torch.stack([torch.mean(v) for v in losses.values()]))
         losses['loss_total'] = loss_total
 
