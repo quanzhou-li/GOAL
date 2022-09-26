@@ -109,7 +109,7 @@ def render_img(cfg):
     verts_obj = to_cpu(obj_m(**obj_parms).vertices)
 
     gnet_optim = GNetOptim(sbj_m, obj_m, cfg)
-    optim_results = gnet_optim.fitting(results, obj_parms)
+    # optim_results = gnet_optim.fitting(results, obj_parms)
 
     if not os.path.exists(os.path.join(cfg.renderings, test_data['sbj_id'])):
         os.makedirs(os.path.join(cfg.renderings, test_data['sbj_id']))
@@ -149,7 +149,9 @@ if __name__ == '__main__':
         'smplx_path': 'smplx_models',
         'model_path': model_path,
         'data_path': data_path,
-        'renderings': renderings
+        'renderings': renderings,
+        'lr': 5e-4,
+        'rh_idx': 'smplx_body_parts_correspondences/rhand_99_indices.npz',
     }
 
     cfg = Config(**cfg)
