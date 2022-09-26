@@ -52,7 +52,7 @@ def construct_sbj_verts(sbj_m, fullpose, sbj_transl, obj_transl):
 
 def render_img(cfg):
     gnet = GNet().to(device)
-    gnet.load_state_dict(torch.load(cfg.model_path, map_location=torch.device('cpu')))
+    gnet.load_state_dict(torch.load(cfg.model_path))
     gnet.eval()
 
     mv = MeshViewer(offscreen=True)
