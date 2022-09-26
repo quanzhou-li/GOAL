@@ -35,7 +35,7 @@ def parse_npz(sequence, allow_pickle=True):
     return data
 
 
-def construct_sbj_verts(sbj_m, fullpose, sbj_transl, obj_transl):
+def construct_sbj_verts(sbj_m, fullpose, sbj_transl, obj_transl, add_obj=True):
     sbj_m = sbj_m.to(device)
     fullpose = fullpose.to(device)
     sbj_transl = sbj_transl.to(device)
@@ -48,7 +48,7 @@ def construct_sbj_verts(sbj_m, fullpose, sbj_transl, obj_transl):
         'reye_pose': fullpose[:, 72:75],
         'left_hand_pose': fullpose[:, 75:120],
         'right_hand_pose': fullpose[:, 120:165],
-        'transl': sbj_transl.reshape(1, 3) + obj_transl
+        'transl': sbj_transl.reshape(1, 3) + obj_transl if add_obj else sbj_transl.reshape(1, 3)
     }
     verts_sbj = to_cpu(sbj_m(**sbj_parms).vertices)
     return verts_sbj
@@ -111,7 +111,7 @@ def render_img(cfg):
     gnet_optim = GNetOptim(sbj_m, obj_m, cfg)
     optim_results, optim_fullpose = gnet_optim.fitting(results, obj_parms)
     verts_sbj['optim'] = construct_sbj_verts(sbj_m, optim_fullpose.reshape(1, -1),
-                                             optim_results['transl'], object_transl)
+                                             optim_results['transl'], object_transl, False)
 
     if not os.path.exists(os.path.join(cfg.renderings, test_data['sbj_id'])):
         os.makedirs(os.path.join(cfg.renderings, test_data['sbj_id']))
