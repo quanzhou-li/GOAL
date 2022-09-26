@@ -152,6 +152,7 @@ if __name__ == '__main__':
         'renderings': renderings,
         'lr': 5e-4,
         'rh_idx': 'smplx_body_parts_correspondences/rhand_99_indices.npz',
+        'n_iters': 100,
     }
 
     cfg = Config(**cfg)
