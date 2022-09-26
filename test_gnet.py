@@ -110,6 +110,7 @@ def render_img(cfg):
 
     gnet_optim = GNetOptim(sbj_m, obj_m, cfg)
     optim_results, optim_fullpose = gnet_optim.fitting(results, obj_parms)
+    optim_results[:, 75:120] = fullpose[:, 75:120]
     verts_sbj['optim'] = construct_sbj_verts(sbj_m, optim_fullpose.reshape(1, -1),
                                              optim_results['transl'], object_transl, False)
 
@@ -118,7 +119,6 @@ def render_img(cfg):
 
     for k in verts_sbj.keys():
         s_mesh = Mesh(vertices=verts_sbj[k][0], faces=sbj_m.faces, vc=colors['pink'], smooth=True)
-        print(verts_sbj[k][0][:, 2].min())
         o_mesh = Mesh(vertices=verts_obj[0], faces=obj_mesh.faces, vc=colors['yellow'])
 
         mv.set_static_meshes([o_mesh, s_mesh])
