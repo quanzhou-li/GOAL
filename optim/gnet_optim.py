@@ -85,6 +85,8 @@ class GNetOptim(nn.Module):
 
         output = self.sbj_m(**self.opt_params, return_full_pose=True)
         verts = output.vertices
+        print(verts.shape)
+        print(verts[:, :, 2].min())
         verts_rh = verts[:, self.rhand_idx]
 
         rh2obj, _, _, _ = self.ch_dist(torch.tensor(verts_rh).to(self.device), torch.tensor(self.obj_verts).to(self.device))
