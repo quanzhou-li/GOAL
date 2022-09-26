@@ -54,8 +54,6 @@ class GNetOptim(nn.Module):
             self.opt_params[k].data = torch.repeat_interleave(start_params[k], 1, dim=0)
 
     def get_smplx_verts(self, net_output, obj_params):
-        net_output = net_output.to(self.device)
-        obj_params = obj_params.to(self.device)
         obj_output = self.obj_m(**obj_params)
         self.obj_verts = obj_output.vertices
         sbj_params = self.construct_sbj_params(net_output, obj_params['transl'])
@@ -77,7 +75,7 @@ class GNetOptim(nn.Module):
             'reye_pose': fullpose[:, 72:75].float(),
             'left_hand_pose': fullpose[:, 75:120].float(),
             'right_hand_pose': fullpose[:, 120:165].float(),
-            'transl': net_output['body_transl'].reshape(1, 3) + obj_transl
+            'transl': net_output['body_transl'].reshape(1, 3).to(self.device) + obj_transl.to(self.device)
         }
         return sbj_params
 
