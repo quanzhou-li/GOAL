@@ -95,33 +95,15 @@ class GNetOptim(nn.Module):
             'grnd_contact': torch.pow(verts[:, :, 2].min() + 0.01, 2),
         }
 
-        body_loss = {k: self.LossL1(self.sbj_params[k], self.opt_params[k]) for k in ['global_orient', 'body_pose', 'left_hand_pose']}
+        body_loss = {k: self.LossL1(self.sbj_params[k], self.opt_params[k]) for k in ['global_orient', 'body_pose']}
         body_loss['right_hand_pose'] = .3*self.LossL1(self.sbj_params['right_hand_pose'], self.opt_params['right_hand_pose'])
-        body_loss['transl'] = self.LossL1(self.sbj_params['transl'], self.opt_params['transl'])
+        # body_loss['transl'] = self.LossL1(self.sbj_params['transl'], self.opt_params['transl'])
 
         losses.update(body_loss)
         loss_total = torch.sum(torch.stack([torch.mean(v) for v in losses.values()]))
         losses['loss_total'] = loss_total
 
         return losses, verts, output
-
-    def get_penetration(self, source_mesh, target_mesh):
-        source_verts = source_mesh.verts_packed()
-        source_normals = source_mesh.verts_normals_packed()
-
-        target_verts = target_mesh.verts_packed()
-
-        src2trgt, trgt2src, src2trgt_idx, trgt2src_idx = self.ch_dist(source_verts.reshape(1, -1, 3).to(self.device),
-                                                                      target_verts.reshape(1, -1, 3).to(self.device))
-        source2target_correspond = target_verts[src2trgt_idx.data.view(-1).long()]
-
-        distance_vector = source_verts - source2target_correspond
-
-        in_out = torch.bmm(source_normals.view(-1, 1, 3), distance_vector.view(-1, 3, 1)).view(-1).sign()
-
-        src2trgt_signed = src2trgt * in_out
-
-        return src2trgt_signed
 
     def fitting(self, net_output, obj_params):
 
