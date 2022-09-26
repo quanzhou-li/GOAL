@@ -110,7 +110,7 @@ def render_img(cfg):
 
     gnet_optim = GNetOptim(sbj_m, obj_m, cfg)
     optim_results, optim_fullpose = gnet_optim.fitting(results, obj_parms)
-    optim_results[:, 75:120] = fullpose[:, 75:120]
+    optim_fullpose[:, 75:120] = fullpose[:, 75:120]
     verts_sbj['optim'] = construct_sbj_verts(sbj_m, optim_fullpose.reshape(1, -1),
                                              optim_results['transl'], object_transl, False)
 
