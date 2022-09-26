@@ -92,7 +92,7 @@ class GNetOptim(nn.Module):
 
         losses = {
             'dist_rh2obj': self.LossL1(rh2obj_w*rh2obj, rh2obj_w*net_output['hand_object_dists']),
-            'grnd_contact': torch.abs(verts[:, :, 1].min() + 0.01),
+            'grnd_contact': torch.pow(verts[:, :, 2].min() + 0.01, 2),
         }
 
         body_loss = {k: self.LossL1(self.sbj_params[k], self.opt_params[k]) for k in ['global_orient', 'body_pose', 'left_hand_pose']}
