@@ -64,7 +64,7 @@ class GNetOptim(nn.Module):
             verts_rh = v[:, self.rhand_idx]
         return verts_rh
 
-    def constrcut_sbj_params(self, net_output, obj_transl):
+    def construct_sbj_params(self, net_output, obj_transl):
         fullpose = rotmat2aa(net_output['fullpose_rotmat'])
         fullpose = fullpose.reshape(1, 165)
         sbj_params = {
