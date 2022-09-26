@@ -54,6 +54,8 @@ class GNetOptim(nn.Module):
             self.opt_params[k].data = torch.repeat_interleave(start_params[k], 1, dim=0)
 
     def get_smplx_verts(self, net_output, obj_params):
+        net_output = net_output.to(self.device)
+        obj_params = obj_params.to(self.device)
         obj_output = self.obj_m(**obj_params)
         self.obj_verts = obj_output.vertices
         sbj_params = self.construct_sbj_params(net_output, obj_params['transl'])
