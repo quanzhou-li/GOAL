@@ -91,7 +91,7 @@ class GNetOptim(nn.Module):
         rh2obj_w = 10
 
         losses = {
-            'dist_rh2obj': self.LossL1(rh2obj_w*rh2obj, rh2obj_w*net_output['hand_object_dists']),
+            'dist_rh2obj': 10 * self.LossL1(rh2obj_w*rh2obj, rh2obj_w*net_output['hand_object_dists']),
             'grnd_contact': torch.pow(verts[:, :, 2].min() + 0.01, 2),
         }
 
