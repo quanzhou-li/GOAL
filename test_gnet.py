@@ -36,6 +36,9 @@ def parse_npz(sequence, allow_pickle=True):
 
 
 def construct_sbj_verts(sbj_m, fullpose, sbj_transl, obj_transl):
+    fullpose = fullpose.to(device)
+    sbj_transl = sbj_transl.to(device)
+    obj_transl = obj_transl.to(device)
     sbj_parms = {
         'global_orient': fullpose[:, :3],
         'body_pose': fullpose[:, 3:66],
