@@ -99,7 +99,7 @@ class GNetOptim(nn.Module):
         body_loss['right_hand_pose'] = .3*self.LossL1(self.sbj_params['right_hand_pose'], self.opt_params['right_hand_pose'])
         body_loss['transl'] = self.LossL1(self.sbj_params['transl'], self.opt_params['transl'])
 
-        # losses.update(body_loss)
+        losses.update(body_loss)
         loss_total = torch.sum(torch.stack([torch.mean(v) for v in losses.values()]))
         losses['loss_total'] = loss_total
 
