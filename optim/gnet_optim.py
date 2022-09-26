@@ -87,7 +87,7 @@ class GNetOptim(nn.Module):
         verts = output.vertices
         verts_rh = verts[:, self.rhand_idx]
 
-        rh2obj, _, _, _ = self.ch_dist(torch.tensor(verts_rh), torch.tensor(self.obj_verts))
+        rh2obj, _, _, _ = self.ch_dist(torch.tensor(verts_rh).to(self.device), torch.tensor(self.obj_verts).to(self.device))
         rh2obj_w = 1
 
         losses = {
