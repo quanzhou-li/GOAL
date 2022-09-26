@@ -137,7 +137,7 @@ class GNetOptim(nn.Module):
                     print(self.create_loss_message(losses, stg, itr))
 
         opt_results = {k: v for k, v in self.opt_params.items()}
-        fullpose = torch.cat([v for k, v in self.opt_params.items()])
+        fullpose = torch.cat([v for k, v in self.opt_params.items() if k != 'transl'], dim=1)
         return opt_results, fullpose
 
     @staticmethod
