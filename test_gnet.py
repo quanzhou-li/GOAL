@@ -65,14 +65,14 @@ def render_img(cfg):
 
     test_data = parse_npz(cfg.data_path)
 
-    bps_dists = torch.tensor(test_data['bps_dists'].reshape(1, 1024))
-    object_transl = torch.tensor(test_data['obj_transl'].reshape(1, 3))
+    bps_dists = torch.tensor(test_data['bps_dists'].reshape(1, 1024)).to(device)
+    object_transl = torch.tensor(test_data['obj_transl'].reshape(1, 3)).to(device)
     # object_transl += torch.tensor([0, -1.2, 0])
     dist = torch.distributions.normal.Normal(
             loc=torch.tensor(np.zeros([1, 16]), requires_grad=False),
             scale=torch.tensor(np.ones([1, 16]), requires_grad=False)
         )
-    Zs = dist.rsample().float()
+    Zs = dist.rsample().float().to(device)
 
     results = gnet.decode(Zs, bps_dists, object_transl)
     fullpose = rotmat2aa(results['fullpose_rotmat'])
