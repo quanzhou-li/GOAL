@@ -123,7 +123,8 @@ class GNetOptim(nn.Module):
                 if itr % 10 == 0:
                     print(self.create_loss_message(losses, stg, itr))
 
-        opt_results = {k: rotmat2aa(CRot2rotmat(v).reshape(-1, 9)).reshape(1, -1) for k, v in self.opt_params.items()}
+        opt_results = {k: rotmat2aa(CRot2rotmat(v).reshape(-1, 9)).reshape(1, -1) for k, v in self.opt_params.items() if k != 'transl'}
+        opt_results['transl'] = self.opt_params['transl']
         return opt_results
 
     @staticmethod
