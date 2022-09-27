@@ -42,7 +42,7 @@ class GNetOptim(nn.Module):
             'transl': torch.zeros(bs, 3, device=device, dtype=dtype, requires_grad=True),
         }
 
-        self.opt_s3 = optim.Adam([self.opt_params[k] for k in ['global_orient', 'transl', 'right_hand_pose']], lr=self.cfg.lr)
+        self.opt_s3 = optim.Adam([self.opt_params[k] for k in ['right_hand_pose']], lr=self.cfg.lr)
         self.optimizer = [self.opt_s3]
         self.num_iters = [self.cfg.n_iters]
 
