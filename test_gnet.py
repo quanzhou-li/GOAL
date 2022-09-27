@@ -152,7 +152,7 @@ if __name__ == '__main__':
         'model_path': model_path,
         'data_path': data_path,
         'renderings': renderings,
-        'lr': 5e-4,
+        'lr': 3e-4,
         'rh_idx': 'smplx_body_parts_correspondences/rhand_99_indices.npz',
         'n_iters': 200,
     }

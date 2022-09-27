@@ -96,15 +96,15 @@ class GNetOptim(nn.Module):
         rh2obj_w = 10
 
         losses = {
-            'dist_rh2obj': 10 * self.LossL1(rh2obj_w*rh2obj, rh2obj_w*net_output['hand_object_dists']),
+            'dist_rh2obj': self.LossL1(rh2obj_w*rh2obj, rh2obj_w*net_output['hand_object_dists']),
             'grnd_contact': torch.pow(verts[:, :, 2].min() + 0.01, 2),
         }
 
-        body_loss = {k: self.LossL1(self.sbj_params_6D[k], self.opt_params[k]) for k in ['global_orient', 'body_pose']}
-        body_loss['right_hand_pose'] = .3*self.LossL1(self.sbj_params_6D['right_hand_pose'], self.opt_params['right_hand_pose'])
+        body_loss = {k: self.LossL1(self.sbj_params_6D[k], self.opt_params[k]) for k in ['global_orient', 'body_pose', 'left_hand_pose']}
+        body_loss['right_hand_pose'] = .3 * self.LossL1(self.sbj_params_6D['right_hand_pose'], self.opt_params['right_hand_pose'])
         body_loss['transl'] = self.LossL1(self.sbj_params_6D['transl'], self.opt_params['transl'])
 
-        # losses.update(body_loss)
+        losses.update(body_loss)
         loss_total = torch.sum(torch.stack([torch.mean(v) for v in losses.values()]))
         losses['loss_total'] = loss_total
 
