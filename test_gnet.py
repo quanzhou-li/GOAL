@@ -109,7 +109,7 @@ def render_img(cfg):
     verts_obj = to_cpu(obj_m(**obj_parms).vertices)
 
     gnet_optim = GNetOptim(sbj_m, obj_m, cfg)
-    optim_results, optim_fullpose = gnet_optim.fitting(results, obj_parms)
+    optim_results = gnet_optim.fitting(results, obj_parms)
     # verts_sbj['optim'] = construct_sbj_verts(sbj_m, optim_fullpose.reshape(1, -1), optim_results['transl'], object_transl, False)
     verts_sbj['optim'] = to_cpu(sbj_m(**optim_results).vertices)
 
