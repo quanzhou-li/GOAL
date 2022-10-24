@@ -93,7 +93,7 @@ class GNetOptim(nn.Module):
         verts_rh = verts[:, self.rhand_idx]
 
         rh2obj, _, _, _ = self.ch_dist(torch.tensor(verts_rh).to(self.device), torch.tensor(self.obj_verts).to(self.device))
-        rh2obj_w = 10
+        rh2obj_w = 0.9
 
         losses = {
             'dist_rh2obj': self.LossL1(rh2obj_w*rh2obj, rh2obj_w*net_output['hand_object_dists']),
